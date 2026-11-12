@@ -43,11 +43,11 @@ process CLEAN_AND_QC {
 	tuple val(metadata), path(raw_csv)
 
 	output:
-	tuple val(metadata), path("${metadata.id}_cleaned.csv"), path("${metadata.id}_qc.json"), emit: qc_results
+	tuple val(metadata), path("${metadata.instrument_id}_cleaned.csv"), path("${metadata.instrument_id}_qc.json"), emit: qc_results
 
 	script:
 	"""
-	clean_qc.py ${raw_csv} ${metadata.id}_cleaned.csv ${metadata.id}_qc.json
+	clean_qc.py ${raw_csv} ${metadata.instrument_id}_cleaned.csv ${metadata.instrument_id}_qc.json
 	"""
 }
 
@@ -56,11 +56,11 @@ process TRAIN_MODEL {
 	tuple val(meta), path(clean_csv), path(qc_json)
 
 	output:
-	tuple val(meta), path("${meta.id}_model.pkl"), path("${meta.id}_metrics.json"), emit: model_results
+	tuple val(meta), path("${meta.instrument_id}_model.pkl"), path("${meta.instrument_id}_metrics.json"), emit: model_results
 
 	script:
 	"""
-	train_model.py ${clean_csv} ${meta.id} ${meta.id}_model.pkl ${meta.id}_metrics.json
+	train_model.py ${clean_csv} ${meta.instrument_id} ${meta.instrument_id}_model.pkl ${meta.instrument_id}_metrics.json
 	"""
 }
 
