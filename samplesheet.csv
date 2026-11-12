@@ -1,0 +1,5 @@
+batch_id,instrument_id,operator,csv_path
+BATCH_2026_01,ROCHE_COBAS_8000_A,Schmidt,data/batch_2026_01.csv
+BATCH_2026_02,ROCHE_COBAS_8000_B,Weber,data/batch_2026_02.csv
+BATCH_2026_03,ABBOTT_ALINITY_01,Mueller,data/batch_2026_03.csv
+BATCH_2026_04,SIEMENS_ATELLICA_2,Becker,data/batch_2026_04.csv

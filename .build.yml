@@ -1,0 +1,40 @@
+image: debian/bookworm
+secrets:
+  - 2ec4e68b-e59a-4c47-9e03-960f3196df9c
+  - da2bdd99-4ea0-4290-8e60-6bf7db0efa77
+environment:
+  mirror_repository: autolab-ivd
+  mirror_username: rehandaphedar
+  ci_repository: autolab-ivd
+packages:
+  - docker.io
+  - apparmor
+  - curl
+  - default-jre-headless
+tasks:
+  - mirror-to-github: |
+      cd ~/${mirror_repository}
+      ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+      git remote add github git@github.com:${mirror_username}/${mirror_repository}.git
+      git push --mirror github
+  - setup: |
+      sudo systemctl start docker
+      sudo usermod -aG docker $USER
+      curl -s https://get.nextflow.io | bash
+      sudo mv nextflow /usr/local/bin/
+  - login-and-build: |
+      source ~/hub.docker.com-credentials
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      cd ~/${ci_repository}
+      docker build -t "$DOCKER_USERNAME/autolab-ivd:latest" .
+      docker run --rm "$DOCKER_USERNAME/autolab-ivd:latest" \
+      python3 -c "import pandas, sklearn, reportlab; print('[OK] Smoke test passed.')"
+  - run-pipeline-test: |
+      cd ~/${ci_repository}
+      nextflow run main.nf -profile docker --outdir results/
+  - run-regression-test: |
+      cd ~/${ci_repository}
+      python3 tests/test_regression.py
+  - push-and-deploy: |
+      source ~/hub.docker.com-credentials
+      docker push "$DOCKER_USERNAME/autolab-ivd:latest"
